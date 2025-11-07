@@ -30,3 +30,15 @@ export const addCartItem = async(req, res) => {
         res.status(500).json({ message : error.message });
     }
 }
+
+export const deleteItem = async(req, res)=> {
+    try {
+        const { id } = req.params;
+        // remove the this item
+        await Cart.findOneAndDelete({_id : id});
+        return res.status(200).json({ message : 'Item removed successfully!'});
+    } catch (error) {
+        console.log(`Error while removing the item!`);
+        return res.status(500).json({ message : error.message });
+    }
+}
