@@ -9,6 +9,6 @@ const app = express();
 const server = createServer(app);
 connectDB();
 
-server.listen(5000, ()=>{
-    console.log(`Server is listening on port : ${5000}`);
+server.listen(process.env.PORT, ()=>{
+    console.log(`Server is listening on port : ${process.env.PORT}`);
 });
