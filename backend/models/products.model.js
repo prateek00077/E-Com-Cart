@@ -9,10 +9,7 @@ const productSchema = new mongoose.Schema({
     price: {
         type: Number,
         default: 0
-    },
-    image: {
-        type: String,
     }
-});
+}, { timestamps : true });
 
 export const Product = mongoose.model('product', productSchema);
