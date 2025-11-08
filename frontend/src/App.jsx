@@ -12,7 +12,21 @@ export default function App() {
   const [error, setError] = useState(null)
   const [view, setView] = useState('products')
   const [receipt, setReceipt] = useState(null)
-  const [darkMode, setDarkMode] = useState(false)
+  const [darkMode, setDarkMode] = useState(() => {
+    try {
+      const v = localStorage.getItem('darkMode')
+      if (v !== null) return v === 'true'
+    } catch (e) {}
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  })
+
+  useEffect(() => {
+    // i will apply dark mode class to all components
+    const el = document.documentElement
+    if (darkMode) el.classList.add('dark')
+    else el.classList.remove('dark')
+    try { localStorage.setItem('darkMode', String(darkMode)) } catch (e) {}
+  }, [darkMode])
 
   const handleViewChange = (newView) => {
     if (newView !== 'receipt') {
@@ -30,7 +44,6 @@ export default function App() {
       setLoading(true)
       setError(null)
       const prods = await fetchProducts()
-      // Ensure products is always an array
       setProducts(Array.isArray(prods) ? prods : [])
       try {
         const c = await fetchCart()
@@ -43,7 +56,7 @@ export default function App() {
       const errorMessage = err.response?.data?.message || err.message || 'Failed to load data'
       setError(`Failed to load products: ${errorMessage}`)
       console.error('Error loading products:', err.response?.data || err)
-      setProducts([]) // Set empty array on error
+      setProducts([])
     } finally {
       setLoading(false)
     }
@@ -80,9 +93,9 @@ export default function App() {
   }
 
   return (
-    <div className={`min-h-screen ${darkMode ? 'dark' : ''} bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white`}>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white">
       <header className="shadow p-4 flex justify-between items-center bg-white dark:bg-gray-800">
-        <h1 className="text-2xl font-semibold">Vibe Commerce</h1>
+        <h1 className="text-2xl font-semibold">E-Commerce</h1>
         <div className="flex gap-3 items-center">
           <button 
             onClick={() => setDarkMode(!darkMode)}
