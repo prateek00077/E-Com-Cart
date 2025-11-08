@@ -31,7 +31,7 @@ E-Com-Cart/
 ### 1️⃣ Clone the Repo
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/prateek00077/E-Com-Cart
 cd E-Com-Cart
 ```
 
