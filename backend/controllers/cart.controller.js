@@ -2,44 +2,51 @@ import { Cart } from "../models/cart.model.js";
 
 export const getCartItems = async(req, res) => {
     try {
-        const cartItems = await Cart.find();
-        return res.status(200).json({messsage : "cart fetched successfully!", cartItems});
+        const cartItems = await Cart.find().populate('productId');
+        
+        const total = cartItems.reduce((sum, item) => {
+            const price = item.productId?.price || 0;
+            const qty = item.qty || 0;
+            return sum + (price * qty);
+        }, 0);
+
+        return res.status(200).json({
+            cartItems,
+            total: Number(total.toFixed(2))
+        });
     } catch (error) {
-        console.log(`Error while fetching cartItems ${error}`);
-        return res.status(500).json({messsage : errormessage});
+        return res.status(500).json({ message: error.message });
     }
 };
 
 export const addCartItem = async(req, res) => {
     try {
-        const productId = req.body.productId;
+        const { productId, qty } = req.body;
 
-        // check if item already exist in the cart or not
+        if (!productId || !qty) {
+            return res.status(400).json({ message: "productId and qty are required" });
+        }
+
         const itemExist = await Cart.findOne({ productId });
 
-        let newItem;
-        if(!itemExist) {
-            // we have to add this item
-            newItem = await Cart.create({ productId, qty : 1});
+        if(itemExist) {
+            await Cart.updateOne({ productId }, { $inc: { qty } });
         } else {
-            // if item already exist in the cart then we will just increase the quantity
-            await Cart.updateOne({ productId }, {$inc: {qty:1}});
+            await Cart.create({ productId, qty });
         }
-        return res.status(201).json({ message : "item added successfully !", newItem});
+        
+        return res.status(201).json({ message: "Item added successfully" });
     } catch (error) {
-        console.log(`Error while adding an item ${error.message}`);
-        res.status(500).json({ message : error.message });
+        return res.status(500).json({ message: error.message });
     }
 }
 
 export const deleteItem = async(req, res)=> {
     try {
         const { id } = req.params;
-        // remove the this item
-        await Cart.findOneAndDelete({_id : id});
-        return res.status(200).json({ message : 'Item removed successfully!'});
+        await Cart.findByIdAndDelete(id);
+        return res.status(200).json({ message: 'Item removed successfully'});
     } catch (error) {
-        console.log(`Error while removing the item!`);
-        return res.status(500).json({ message : error.message });
+        return res.status(500).json({ message: error.message });
     }
 }
